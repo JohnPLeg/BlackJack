@@ -1,10 +1,10 @@
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router';
 import styles from './Navigation.module.css'
 
 function Navigation() {
   return (
     <nav className={styles.navbar}>
-      <Link to="/" className={styles.navLink}>Home</Link>
+      <NavLink to="/" className={styles.navLink}>Home</NavLink>
     </nav>
   );
 }
