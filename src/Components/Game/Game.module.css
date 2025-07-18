@@ -1,5 +1,5 @@
 .mainContainer {
-    min-height: 100vh;
+    min-height: 90vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -19,7 +19,9 @@
 }
 
 .playerContainer {
-    margin-top: 100px;
+    margin-top: 75px;
+    flex-direction: column;
+    padding-top: 10px;
 }
 
 .btnContainer {
@@ -55,4 +57,14 @@ img {
     margin-left: 10px;
     margin-right: 10px;
     width: 150px;
+}
+
+.turn {
+    margin-top: 10px;
+    margin-bottom: 0px;
+}
+
+.counter {
+    margin-top: 0px;
+    margin-bottom: 10px;
 }
