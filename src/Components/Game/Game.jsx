@@ -34,7 +34,7 @@ function Game () {
         }
     }, [hand]);
 
-    // Cleanup on route change (but not on first mount)
+    // Cleanup on route change 
     useEffect(() => {
         if (firstRender.current) {
             firstRender.current = false;
@@ -58,19 +58,36 @@ function Game () {
         return <button className={styles.split} disabled>Split</button>;
     }
 
+    function hit () {
+        const newCard = deal(0, 51);
+        setHand(prev => [...prev, newCard]);
+
+        const newDealerCard = deal(0, 51);
+        setTimeout(() => {
+            setDealerHand(prev => [...prev, newDealerCard])
+        }, 500);
+    }
+
     return (
         <div className={styles.mainContainer}>
             <div className={styles.container}>
                 <div className={styles.dealerContainer}>
-                    {dealerHand[0] && <img src={`/${dealerHand[0]}`} alt="dealers face card" />}
-                    <img src="/back_of_card.png" alt="back of a playing card" />
+                    {(dealerHand.length == 2) ? (
+                        <>
+                            <img src={`/${dealerHand[0]}`} alt="dealers face card" />
+                            <img src="/back_of_card.png" alt="back of a playing card" />
+                        </>
+                    ) : (
+                        <>
+                            {dealerHand.map((card, index) => ( <img key={index} src={`/${card}`}/> ))}
+                        </>
+                    )}
                 </div>
                 <div className={styles.playerContainer}>
-                    {hand[0] && <img src={`/${hand[0]}`} alt="card" />}
-                    {hand[1] && <img src={`/${hand[1]}`} alt="card" />}
+                    {hand.map((card, index) => ( <img key={index} src={`/${card}`}/> ))}
                 </div>
                 <div className={styles.btnContainer}>
-                    <button className={styles.hit}>Hit</button>
+                    <button className={styles.hit} onClick={hit}>Hit</button>
                     <button className={styles.stand}>Stand</button>
                     {canSplit()}
                 </div>
