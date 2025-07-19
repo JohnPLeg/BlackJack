@@ -7,7 +7,8 @@ import styles from "./Game.module.css";
 function Game () {
     const location = useLocation();
     const firstRender = useRef(true);
-    const [points, setPoints] = useState(0);
+    const [playerPoints, setPlayerPoints] = useState(0);
+    const [dealerPoints, setDealerPoints] = useState(0);
     const [playersTurn, setPlayersTurn] = useState(true);
     const [dealerHand, setDealerHand] = useState([]);
     const [hand, setHand] = useState([]);
@@ -85,10 +86,11 @@ function Game () {
     }
 
     useEffect(() => {
-        setPoints(calcPlayerPoints());
-    }, [hand])
+        setPlayerPoints(calcPoints(hand));
+        setDealerPoints(calcPoints(dealerHand));
+    }, [hand, dealerHand])
 
-    function calcPlayerPoints() {
+    function calcPoints(hand) {
         let sum = 0;
         let aces = 0;
 
@@ -123,19 +125,22 @@ function Game () {
             <div className={styles.mainContainer}>
                 <div className={styles.container}>
                     <div className={styles.dealerContainer}>
-                        {(dealerHand.length == 2) ? (
-                            <>
-                                <img src={`/${dealerHand[0]}`} alt="dealers face card" />
-                                <img src="/back_of_card.png" alt="back of a playing card" />
-                            </>
-                        ) : (
-                            <>
-                                {dealerHand.map((card, index) => ( <img key={index} src={`/${card}`}/> ))}
-                            </>
-                        )}
+                        <h1 className={styles.counter}>{dealerPoints}</h1>
+                        <div className={styles.cards}>
+                            {(dealerHand.length == 2) ? (
+                                <>
+                                    <img src={`/${dealerHand[0]}`} alt="dealers face card" />
+                                    <img src="/back_of_card.png" alt="back of a playing card" />
+                                </>
+                            ) : (
+                                <>
+                                    {dealerHand.map((card, index) => ( <img key={index} src={`/${card}`}/> ))}
+                                </>
+                            )}
+                        </div>
                     </div>
                     <div className={styles.playerContainer}>
-                        <h1 className={styles.counter}>{points}</h1>
+                        <h1 className={styles.counter}>{playerPoints}</h1>
                         <div className={styles.cards}>
                             {hand.map((card, index) => ( <img key={index} src={`/${card}`}/> ))}
                         </div>

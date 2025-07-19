@@ -16,12 +16,13 @@
     height: auto;
     margin-left: auto;
     margin-right: auto;
+    flex-direction: column;
+    padding-top: 10px;
+    
 }
 
 .playerContainer {
     margin-top: 75px;
-    flex-direction: column;
-    padding-top: 10px;
 }
 
 .btnContainer {
