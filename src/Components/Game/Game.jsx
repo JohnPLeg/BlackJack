@@ -35,7 +35,11 @@ function Game () {
         if (hand.length > 0) {
             localStorage.setItem("playerHand", JSON.stringify(hand));
         }
-    }, [hand]);
+
+        if (hand.length > 0) {
+            localStorage.setItem("dealerHand", JSON.stringify(dealerHand));
+        }
+    }, [hand, dealerHand]);
 
     // Cleanup on route change 
     useEffect(() => {
