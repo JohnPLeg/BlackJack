@@ -11,6 +11,8 @@ function Game () {
     const [playersTurn, setPlayersTurn] = useState(true);
     const [dealerHand, setDealerHand] = useState([]);
     const [hand, setHand] = useState([]);
+    const [winner, setWinner] = useState(false);
+    const [playerWin, setPlayerWin] = useState(false);
 
     // Deal or load saved hands
     useEffect(() => {
@@ -121,7 +123,7 @@ function Game () {
 
         function dealerSoloPlay(currentDealerHand) {
             const points = calcPoints(currentDealerHand);
-            //  hit sub 17  ||  hit above 17 and below 21   || hit treating ace as 1 if above 21
+            //  hit sub 17  ||  hit above 17 and below 21
             if (points < 17 || (points > 17 && points < 21)) {
                 const newDealerCard = deal(0, 51);
                 const newDealerHand = [...currentDealerHand, newDealerCard];
@@ -130,10 +132,13 @@ function Game () {
 
                 setTimeout(() => dealerSoloPlay(newDealerHand), 1000);
             } else {
+                setWinner(true);
                 if (points === 21) {
-                    console.log("dealer wins");
+                    console.log("dealer win");
+                    setPlayerWin(false);
                 } else {
                     console.log("dealer bust");
+                    setPlayerWin(true);
                 }
             }
         }
@@ -144,7 +149,12 @@ function Game () {
 
     return (
         <>
-            <h1 className={styles.turn}>{(playersTurn) ? "Player" : "Dealer" }'s Turn</h1>
+            
+            {winner ? (
+                <h1 className={styles.turn}>{playerWin ? "Player Wins!" : "Dealer Wins!"}</h1> 
+            ) : (
+                <h1 className={styles.turn}>{(playersTurn) ? "Player" : "Dealer" }'s Turn</h1>
+            )}
             <div className={styles.mainContainer}>
                 <div className={styles.container}>
                     <div className={styles.dealerContainer}>
