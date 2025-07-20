@@ -1,5 +1,4 @@
 import deal from "../../Game Logic/dealing";
-import { cards } from "../../Game Logic/cards";
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import styles from "./Game.module.css";
@@ -117,7 +116,6 @@ function Game () {
         return sum;
     }
 
-    //(hasAce() && (points > 21) && (points < 32))
     function stand() {
         setPlayersTurn(false);
 
