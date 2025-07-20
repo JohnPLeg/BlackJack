@@ -79,7 +79,6 @@ function Game () {
     }
 
     function hit () {
-        setFirstTurn(false);
         const newCard = deal(0, 51);
         const newHand = [...hand, newCard];
         setHand(newHand);
@@ -87,10 +86,13 @@ function Game () {
         const pPoints = calcPoints(newHand);
 
         if (pPoints > 21) {
-            setPlayerPoints(newPoints);
+            setPlayerPoints(pPoints);
             setWinner(true);
             setResult("Player Bust");
-            return;
+        } else if (pPoints === 21) {
+            setPlayerPoints(pPoints);
+            setWinner(true);
+            setResult("Player Wins!");
         }
     }
 
