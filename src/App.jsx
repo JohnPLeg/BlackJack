@@ -1,7 +1,6 @@
 import Home from './Components/Home/Home'
 import Navigation from './Components/Navigation/Navigation'
 import Game from './Components/Game/Game'
-import './App.css'
 import { Route, Routes } from 'react-router'
 
 function App() {

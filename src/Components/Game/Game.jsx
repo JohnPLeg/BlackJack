@@ -1,11 +1,12 @@
 import deal from "../../Game Logic/dealing";
+import { restoreDeck } from "../../Game Logic/cards";
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import styles from "./Game.module.css";
 
 function Game () {
     const location = useLocation();
-    const firstRender = useRef(true);
+    const [firstRender, setFirstRender] = useState(true);
     const [firstTurn, setFirstTurn] = useState(() => {
         const saved = localStorage.getItem("firstTurn");
         return saved !== null ? JSON.parse(saved) : true;
@@ -17,6 +18,16 @@ function Game () {
     const [hand, setHand] = useState([]);
     const [winner, setWinner] = useState(false);
     const [result, setResult] = useState("");
+
+    // clears any possible leftover data from local storage
+    useEffect(() => {
+        if (location.pathname !== "/game") {
+            localStorage.removeItem("playerHand");
+            localStorage.removeItem("dealerHand");
+            localStorage.removeItem("firstTurn");
+            restoreDeck();
+        }
+    }, [location.pathname]);
 
     // retrieves the firstTurn value from storage
     useEffect(() => {
@@ -33,12 +44,23 @@ function Game () {
             setHand(JSON.parse(savedPlayerHand));
             setDealerHand(JSON.parse(savedDealerHand));
         } else {
-            const newHand = [deal(0, 51), deal(0, 51)];
-            const newDealer = [deal(0, 51), deal(0, 51)];
+            const newHand = [deal(), deal()];
+            const newDealer = [deal(), deal()];
             setHand(newHand);
             setDealerHand(newDealer);
             localStorage.setItem("playerHand", JSON.stringify(newHand));
             localStorage.setItem("dealerHand", JSON.stringify(newDealer));
+
+            const pPoints = calcPoints(newHand);
+            const dPoints = calcPoints(newDealer);
+
+            if (pPoints === 21) {
+                setWinner(true);
+                setResult("Player Wins!");
+            } else if (dPoints === 21) {
+                setWinner(true);
+                setResult("Dealer Wins!");
+            }
         }
     }, []);
 
@@ -53,28 +75,39 @@ function Game () {
         }
     }, [hand, dealerHand]);
 
-    // Cleanup on route change 
-    useEffect(() => {
-        if (firstRender.current) {
-            firstRender.current = false;
-            return;
-        }
-
-        return () => {
-            localStorage.removeItem("playerHand");
-            localStorage.removeItem("dealerHand");
-            localStorage.removeItem("firstTurn");
-        };
-    }, [location.pathname]);
-
     // updates the current point amounts for dealer and player upon change
     useEffect(() => {
-        const pPoints = calcPoints(hand);
-        const dPoints = calcPoints(dealerHand);
-        setPlayerPoints(pPoints);
-        setDealerPoints(dPoints);
-        
-    }, [hand, dealerHand])
+    const pPoints = calcPoints(hand);
+    const dPoints = calcPoints(dealerHand);
+
+    setPlayerPoints(pPoints);
+    setDealerPoints(dPoints);
+
+    // Only run this blackjack check once at the start
+        if (
+            hand.length === 2 &&
+            dealerHand.length === 2 &&
+            firstRender
+        ) {
+            if (pPoints === 21 && dPoints === 21) {
+                setWinner(true);
+                setResult("Push!");
+                setPlayersTurn(false);
+            } else if (dPoints === 21) {
+                setWinner(true);
+                setResult("Dealer Wins!");
+                setPlayersTurn(false);
+            } else if (pPoints === 21) {
+                setWinner(true);
+                setResult("Player Wins!");
+                setPlayersTurn(false);
+            }
+
+            // prevent future reruns
+            setFirstRender(false);
+        }
+    }, [hand, dealerHand]);
+
 
     // checks if the player can split
     function canSplit() {
@@ -117,7 +150,7 @@ function Game () {
 
     // allows the player to hit
     function hit () {
-        const newCard = deal(0, 51);
+        const newCard = deal();
         const newHand = [...hand, newCard];
         setHand(newHand);
 
@@ -145,7 +178,7 @@ function Game () {
             const pPoints = calcPoints(hand);
             //  hit sub 17
             if (dPoints < 17) {
-                const newDealerCard = deal(0, 51);
+                const newDealerCard = deal();
                 const newDealerHand = [...currentDealerHand, newDealerCard];
 
                 setDealerHand(newDealerHand);
@@ -170,6 +203,27 @@ function Game () {
             }
         }
         setTimeout(() => dealerSoloPlay(dealerHand), 500);
+    }
+
+    function resetGame() {
+        localStorage.removeItem("playerHand");
+        localStorage.removeItem("dealerHand");
+        localStorage.removeItem("firstTurn");
+
+        restoreDeck();  // resets the deck so dealing can start fresh
+
+        const newHand = [deal(), deal()];
+        const newDealer = [deal(), deal()];
+
+        setHand(newHand);
+        setDealerHand(newDealer);
+        setWinner(false);
+        setResult("");
+        setPlayersTurn(true);
+        setFirstTurn(true);
+
+        localStorage.setItem("playerHand", JSON.stringify(newHand));
+        localStorage.setItem("dealerHand", JSON.stringify(newDealer));
     }
 
     
@@ -206,9 +260,15 @@ function Game () {
                         </div>
                     </div>
                     <div className={styles.btnContainer}>
-                        <button className={styles.hit} onClick={hit} disabled={winner || !playersTurn}>Hit</button>
-                        <button className={styles.stand} onClick={stand} disabled={winner || !playersTurn}>Stand</button>
-                        {canSplit()}
+                        {!winner ? (
+                            <>
+                                <button className={styles.hit} onClick={hit} disabled={winner || !playersTurn}>Hit</button>
+                                <button className={styles.stand} onClick={stand} disabled={winner || !playersTurn}>Stand</button>
+                                {canSplit()}
+                            </>
+                        ):(
+                            <button className={styles.newGame} onClick={resetGame}>New Game</button>
+                        )}
                     </div>
                 </div>
             </div>

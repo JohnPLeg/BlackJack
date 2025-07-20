@@ -1,12 +1,9 @@
 import { cards } from "./cards";
 
-function deal(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
+function deal() {
+    const index = Math.floor(Math.random() * cards.length);
 
-    let index = Math.floor(Math.random() * (max - min + 1)) + min;
-
-    return cards[index];
+    return cards.splice(index, 1)[0];
 }
 
 export default deal;
