@@ -37,7 +37,7 @@ function Game () {
             localStorage.setItem("playerHand", JSON.stringify(hand));
         }
 
-        if (hand.length > 0) {
+        if (dealerHand.length > 0) {
             localStorage.setItem("dealerHand", JSON.stringify(dealerHand));
         }
     }, [hand, dealerHand]);
@@ -75,7 +75,7 @@ function Game () {
 
             setTimeout(() => {
                 const newDealerCard = deal(0, 51);
-                setDealerHand(prev => [...prev, newDealerCard])
+                setDealerHand(prev => [...prev, newDealerCard]);
 
                 setTimeout(() => {
                     setPlayersTurn(true);
@@ -89,6 +89,7 @@ function Game () {
         setPlayerPoints(calcPoints(hand));
         setDealerPoints(calcPoints(dealerHand));
     }, [hand, dealerHand])
+
 
     function calcPoints(hand) {
         let sum = 0;
@@ -116,6 +117,30 @@ function Game () {
         return sum;
     }
 
+    //(hasAce() && (points > 21) && (points < 32))
+    function stand() {
+        setPlayersTurn(false);
+
+        function dealerSoloPlay(currentDealerHand) {
+            const points = calcPoints(currentDealerHand);
+            //  hit sub 17  ||  hit above 17 and below 21   || hit treating ace as 1 if above 21
+            if (points < 17 || (points > 17 && points < 21)) {
+                const newDealerCard = deal(0, 51);
+                const newDealerHand = [...currentDealerHand, newDealerCard];
+
+                setDealerHand(newDealerHand);
+
+                setTimeout(() => dealerSoloPlay(newDealerHand), 1000);
+            } else {
+                if (points === 21) {
+                    console.log("dealer wins");
+                } else {
+                    console.log("dealer bust");
+                }
+            }
+        }
+        setTimeout(() => dealerSoloPlay(dealerHand), 500);
+    }
 
     
 
@@ -147,7 +172,7 @@ function Game () {
                     </div>
                     <div className={styles.btnContainer}>
                         <button className={styles.hit} onClick={hit}>Hit</button>
-                        <button className={styles.stand}>Stand</button>
+                        <button className={styles.stand} onClick={stand}>Stand</button>
                         {canSplit()}
                     </div>
                 </div>
