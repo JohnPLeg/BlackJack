@@ -11,8 +11,9 @@ function Game () {
     const [playersTurn, setPlayersTurn] = useState(true);
     const [dealerHand, setDealerHand] = useState([]);
     const [hand, setHand] = useState([]);
+    const [firstTurn, setFirstTurn] = useState(true);
     const [winner, setWinner] = useState(false);
-    const [playerWin, setPlayerWin] = useState(false);
+    const [result, setResult] = useState("");
 
     // Deal or load saved hands
     useEffect(() => {
@@ -68,15 +69,46 @@ function Game () {
     }
 
     function hit () {
+        setFirstTurn(false);
         const newCard = deal(0, 51);
-        setHand(prev => [...prev, newCard]);
+        const newHand = [...hand, newCard];
+        setHand(newHand);
+
+        const pPoints = calcPoints(newHand);
+
+        if (pPoints === 21) {
+            console.log("player win");
+            setResult("Player Wins!");
+            setWinner(true);
+            return;
+        } else if (pPoints > 21) {
+            console.log("player bust");
+            setResult("Player Bust!");
+            setWinner(true);
+            return;
+        }
 
         setTimeout(() => {
             setPlayersTurn(false);
 
             setTimeout(() => {
                 const newDealerCard = deal(0, 51);
-                setDealerHand(prev => [...prev, newDealerCard]);
+                const newDealerHand = [...dealerHand, newDealerCard];
+                setDealerHand(newDealerHand);
+
+                const dPoints = calcPoints(newDealerHand);
+
+                if (dPoints === 21) {
+                    console.log("dealer win");
+                    setResult("Dealer Wins!");
+                    setWinner(true);
+                    return;
+                } else if (dPoints > 21) {
+                    console.log("dealer bust");
+                    setResult("Dealer Bust!");
+                    setWinner(true);
+                    return;
+                }
 
                 setTimeout(() => {
                     setPlayersTurn(true);
@@ -87,8 +119,11 @@ function Game () {
     }
 
     useEffect(() => {
-        setPlayerPoints(calcPoints(hand));
-        setDealerPoints(calcPoints(dealerHand));
+        const pPoints = calcPoints(hand);
+        const dPoints = calcPoints(dealerHand);
+        setPlayerPoints(pPoints);
+        setDealerPoints(dPoints);
+        
     }, [hand, dealerHand])
 
 
@@ -120,11 +155,13 @@ function Game () {
 
     function stand() {
         setPlayersTurn(false);
+        setFirstTurn(false);
 
         function dealerSoloPlay(currentDealerHand) {
-            const points = calcPoints(currentDealerHand);
-            //  hit sub 17  ||  hit above 17 and below 21
-            if (points < 17 || (points > 17 && points < 21)) {
+            const dPoints = calcPoints(currentDealerHand);
+            const pPoints = calcPoints(hand);
+            //  hit sub 17
+            if (dPoints < 17) {
                 const newDealerCard = deal(0, 51);
                 const newDealerHand = [...currentDealerHand, newDealerCard];
 
@@ -133,12 +170,18 @@ function Game () {
                 setTimeout(() => dealerSoloPlay(newDealerHand), 1000);
             } else {
                 setWinner(true);
-                if (points === 21) {
-                    console.log("dealer win");
-                    setPlayerWin(false);
-                } else {
+                if (dPoints > 21) {
                     console.log("dealer bust");
-                    setPlayerWin(true);
+                    setResult("Dealer Bust");
+                } else if (dPoints === pPoints) {
+                    console.log("Push");
+                    setResult("Push!");
+                } else if (dPoints === 21 || dPoints > pPoints) {
+                    console.log("dealer win");
+                    setResult("Dealer Wins!");
+                } else {
+                    console.log("player wins");
+                    setResult("Player Wins!");
                 }
             }
         }
@@ -151,16 +194,16 @@ function Game () {
         <>
             
             {winner ? (
-                <h1 className={styles.turn}>{playerWin ? "Player Wins!" : "Dealer Wins!"}</h1> 
+                <h1 className={styles.turn}>{result}</h1> 
             ) : (
                 <h1 className={styles.turn}>{(playersTurn) ? "Player" : "Dealer" }'s Turn</h1>
             )}
             <div className={styles.mainContainer}>
                 <div className={styles.container}>
                     <div className={styles.dealerContainer}>
-                        <h1 className={styles.counter}>{dealerPoints}</h1>
+                        <h1 className={styles.counter}>{(firstTurn && dealerHand[0]) ? `${calcPoints([dealerHand[0]])} + ?` : dealerPoints}</h1>
                         <div className={styles.cards}>
-                            {(dealerHand.length == 2) ? (
+                            {(firstTurn) ? (
                                 <>
                                     <img src={`/${dealerHand[0]}`} alt="dealers face card" />
                                     <img src="/back_of_card.png" alt="back of a playing card" />
@@ -179,8 +222,8 @@ function Game () {
                         </div>
                     </div>
                     <div className={styles.btnContainer}>
-                        <button className={styles.hit} onClick={hit}>Hit</button>
-                        <button className={styles.stand} onClick={stand}>Stand</button>
+                        <button className={styles.hit} onClick={hit} disabled={winner || !playersTurn}>Hit</button>
+                        <button className={styles.stand} onClick={stand} disabled={winner || !playersTurn}>Stand</button>
                         {canSplit()}
                     </div>
                 </div>
