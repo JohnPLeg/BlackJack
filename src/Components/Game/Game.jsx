@@ -6,14 +6,23 @@ import styles from "./Game.module.css";
 function Game () {
     const location = useLocation();
     const firstRender = useRef(true);
+    const [firstTurn, setFirstTurn] = useState(() => {
+        const saved = localStorage.getItem("firstTurn");
+        return saved !== null ? JSON.parse(saved) : true;
+    });
+
     const [playerPoints, setPlayerPoints] = useState(0);
     const [dealerPoints, setDealerPoints] = useState(0);
     const [playersTurn, setPlayersTurn] = useState(true);
     const [dealerHand, setDealerHand] = useState([]);
     const [hand, setHand] = useState([]);
-    const [firstTurn, setFirstTurn] = useState(true);
     const [winner, setWinner] = useState(false);
     const [result, setResult] = useState("");
+
+    useEffect(() => {
+        localStorage.setItem("firstTurn", JSON.stringify(firstTurn));
+    }, [firstTurn]);
+
 
     // Deal or load saved hands
     useEffect(() => {
@@ -54,6 +63,7 @@ function Game () {
         return () => {
             localStorage.removeItem("playerHand");
             localStorage.removeItem("dealerHand");
+            localStorage.removeItem("firstTurn");
         };
     }, [location.pathname]);
 
@@ -76,46 +86,12 @@ function Game () {
 
         const pPoints = calcPoints(newHand);
 
-        if (pPoints === 21) {
-            console.log("player win");
-            setResult("Player Wins!");
+        if (pPoints > 21) {
+            setPlayerPoints(newPoints);
             setWinner(true);
-            return;
-        } else if (pPoints > 21) {
-            console.log("player bust");
-            setResult("Player Bust!");
-            setWinner(true);
+            setResult("Player Bust");
             return;
         }
-
-        setTimeout(() => {
-            setPlayersTurn(false);
-
-            setTimeout(() => {
-                const newDealerCard = deal(0, 51);
-                const newDealerHand = [...dealerHand, newDealerCard];
-                setDealerHand(newDealerHand);
-
-                const dPoints = calcPoints(newDealerHand);
-
-                if (dPoints === 21) {
-                    console.log("dealer win");
-                    setResult("Dealer Wins!");
-                    setWinner(true);
-                    return;
-                } else if (dPoints > 21) {
-                    console.log("dealer bust");
-                    setResult("Dealer Bust!");
-                    setWinner(true);
-                    return;
-                }
-
-                setTimeout(() => {
-                    setPlayersTurn(true);
-                }, 500);
-            }, 1000);
-        }, 500);
-
     }
 
     useEffect(() => {
