@@ -10,7 +10,6 @@ function Game () {
         const saved = localStorage.getItem("firstTurn");
         return saved !== null ? JSON.parse(saved) : true;
     });
-
     const [playerPoints, setPlayerPoints] = useState(0);
     const [dealerPoints, setDealerPoints] = useState(0);
     const [playersTurn, setPlayersTurn] = useState(true);
@@ -19,12 +18,13 @@ function Game () {
     const [winner, setWinner] = useState(false);
     const [result, setResult] = useState("");
 
+    // retrieves the firstTurn value from storage
     useEffect(() => {
         localStorage.setItem("firstTurn", JSON.stringify(firstTurn));
     }, [firstTurn]);
 
 
-    // Deal or load saved hands
+    // Load saved hands or deal new cards 
     useEffect(() => {
         const savedPlayerHand = localStorage.getItem("playerHand");
         const savedDealerHand = localStorage.getItem("dealerHand");
@@ -67,6 +67,16 @@ function Game () {
         };
     }, [location.pathname]);
 
+    // updates the current point amounts for dealer and player upon change
+    useEffect(() => {
+        const pPoints = calcPoints(hand);
+        const dPoints = calcPoints(dealerHand);
+        setPlayerPoints(pPoints);
+        setDealerPoints(dPoints);
+        
+    }, [hand, dealerHand])
+
+    // checks if the player can split
     function canSplit() {
         if (hand.length === 2) {
             const rank1 = hand[0].split("_of_")[0];
@@ -78,33 +88,7 @@ function Game () {
         return <button className={styles.split} disabled>Split</button>;
     }
 
-    function hit () {
-        const newCard = deal(0, 51);
-        const newHand = [...hand, newCard];
-        setHand(newHand);
-
-        const pPoints = calcPoints(newHand);
-
-        if (pPoints > 21) {
-            setPlayerPoints(pPoints);
-            setWinner(true);
-            setResult("Player Bust");
-        } else if (pPoints === 21) {
-            setPlayerPoints(pPoints);
-            setWinner(true);
-            setResult("Player Wins!");
-        }
-    }
-
-    useEffect(() => {
-        const pPoints = calcPoints(hand);
-        const dPoints = calcPoints(dealerHand);
-        setPlayerPoints(pPoints);
-        setDealerPoints(dPoints);
-        
-    }, [hand, dealerHand])
-
-
+    // calculates the points with a given hand
     function calcPoints(hand) {
         let sum = 0;
         let aces = 0;
@@ -131,10 +115,31 @@ function Game () {
         return sum;
     }
 
+    // allows the player to hit
+    function hit () {
+        const newCard = deal(0, 51);
+        const newHand = [...hand, newCard];
+        setHand(newHand);
+
+        const pPoints = calcPoints(newHand);
+        
+        // checks bust or win
+        if (pPoints > 21) {
+            setWinner(true);
+            setResult("Player Bust");
+        } else if (pPoints === 21) {
+            setWinner(true);
+            setResult("Player Wins!");
+        }
+        setPlayerPoints(pPoints);
+    }
+
+    // allows the player to stand
     function stand() {
         setPlayersTurn(false);
         setFirstTurn(false);
 
+        // dealer plays until it wins or points >= 17
         function dealerSoloPlay(currentDealerHand) {
             const dPoints = calcPoints(currentDealerHand);
             const pPoints = calcPoints(hand);
@@ -147,6 +152,7 @@ function Game () {
 
                 setTimeout(() => dealerSoloPlay(newDealerHand), 1000);
             } else {
+                // game ends and winner is decided
                 setWinner(true);
                 if (dPoints > 21) {
                     console.log("dealer bust");
