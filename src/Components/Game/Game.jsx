@@ -50,17 +50,7 @@ function Game () {
             setDealerHand(newDealer);
             localStorage.setItem("playerHand", JSON.stringify(newHand));
             localStorage.setItem("dealerHand", JSON.stringify(newDealer));
-
-            const pPoints = calcPoints(newHand);
-            const dPoints = calcPoints(newDealer);
-
-            if (pPoints === 21) {
-                setWinner(true);
-                setResult("Player Wins!");
-            } else if (dPoints === 21) {
-                setWinner(true);
-                setResult("Dealer Wins!");
-            }
+            // Removed the blackjack check - let the other useEffect handle it
         }
     }, []);
 
@@ -73,7 +63,7 @@ function Game () {
         if (dealerHand.length > 0) {
             localStorage.setItem("dealerHand", JSON.stringify(dealerHand));
         }
-    }, [hand, dealerHand]);
+    }, [hand, dealerHand, firstRender]);
 
     // updates the current point amounts for dealer and player upon change
     useEffect(() => {
@@ -243,12 +233,12 @@ function Game () {
                         <div className={styles.cards}>
                             {(firstTurn) ? (
                                 <>
-                                    <img src={`/${dealerHand[0]}`} alt="dealers face card" />
-                                    <img src="/back_of_card.png" alt="back of a playing card" />
+                                    <img src={`/BlackJack/${dealerHand[0]}`} alt="dealers face card" />
+                                    <img src="/BlackJack/back_of_card.png" alt="back of a playing card" />
                                 </>
                             ) : (
                                 <>
-                                    {dealerHand.map((card, index) => ( <img key={index} src={`/${card}`}/> ))}
+                                    {dealerHand.map((card, index) => ( <img key={index} src={`/BlackJack/${card}`}/> ))}
                                 </>
                             )}
                         </div>
@@ -256,7 +246,7 @@ function Game () {
                     <div className={styles.playerContainer}>
                         <h1 className={styles.counter}>{playerPoints}</h1>
                         <div className={styles.cards}>
-                            {hand.map((card, index) => ( <img key={index} src={`/${card}`}/> ))}
+                            {hand.map((card, index) => ( <img key={index} src={`/BlackJack/${card}`}/> ))}
                         </div>
                     </div>
                     <div className={styles.btnContainer}>
