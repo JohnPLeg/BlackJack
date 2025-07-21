@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://JohnPLeg.github.io/BlackJack",
+  "homepage": "https://johnpleg.github.io/BlackJack",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
