@@ -7,10 +7,7 @@ import styles from "./Game.module.css";
 function Game () {
     const location = useLocation();
     const [firstRender, setFirstRender] = useState(true);
-    const [firstTurn, setFirstTurn] = useState(() => {
-        const saved = localStorage.getItem("firstTurn");
-        return saved !== null ? JSON.parse(saved) : true;
-    });
+    const [firstTurn, setFirstTurn] = useState(true);
     const [playerPoints, setPlayerPoints] = useState(0);
     const [dealerPoints, setDealerPoints] = useState(0);
     const [playersTurn, setPlayersTurn] = useState(true);
@@ -18,52 +15,19 @@ function Game () {
     const [hand, setHand] = useState([]);
     const [winner, setWinner] = useState(false);
     const [result, setResult] = useState("");
+    const [gameInitialized, setGameInitialized] = useState(false);
 
-    // clears any possible leftover data from local storage
+    // Initialize game with first deal
     useEffect(() => {
-        if (location.pathname !== "/game") {
-            localStorage.removeItem("playerHand");
-            localStorage.removeItem("dealerHand");
-            localStorage.removeItem("firstTurn");
-            restoreDeck();
-        }
-    }, [location.pathname]);
-
-    // retrieves the firstTurn value from storage
-    useEffect(() => {
-        localStorage.setItem("firstTurn", JSON.stringify(firstTurn));
-    }, [firstTurn]);
-
-
-    // Load saved hands or deal new cards 
-    useEffect(() => {
-        const savedPlayerHand = localStorage.getItem("playerHand");
-        const savedDealerHand = localStorage.getItem("dealerHand");
-
-        if (savedPlayerHand && savedDealerHand) {
-            setHand(JSON.parse(savedPlayerHand));
-            setDealerHand(JSON.parse(savedDealerHand));
-        } else {
+        if (!gameInitialized) {
             const newHand = [deal(), deal()];
             const newDealer = [deal(), deal()];
             setHand(newHand);
             setDealerHand(newDealer);
-            localStorage.setItem("playerHand", JSON.stringify(newHand));
-            localStorage.setItem("dealerHand", JSON.stringify(newDealer));
-            // Removed the blackjack check - let the other useEffect handle it
+            setGameInitialized(true);
         }
-    }, []);
+    }, [gameInitialized]);
 
-    // Save updated player hand
-    useEffect(() => {
-        if (hand.length > 0) {
-            localStorage.setItem("playerHand", JSON.stringify(hand));
-        }
-
-        if (dealerHand.length > 0) {
-            localStorage.setItem("dealerHand", JSON.stringify(dealerHand));
-        }
-    }, [hand, dealerHand, firstRender]);
 
     // updates the current point amounts for dealer and player upon change
     useEffect(() => {
@@ -77,7 +41,7 @@ function Game () {
         if (
             hand.length === 2 &&
             dealerHand.length === 2 &&
-            firstRender
+            firstTurn
         ) {
             if (pPoints === 21 && dPoints === 21) {
                 setWinner(true);
@@ -92,11 +56,8 @@ function Game () {
                 setResult("BlackJack!");
                 setPlayersTurn(false);
             }
-
-            // prevent future reruns
-            setFirstRender(false);
         }
-    }, [hand, dealerHand]);
+    }, [hand, dealerHand, firstTurn]);
 
     // calculates the points with a given hand
     function calcPoints(hand) {
@@ -137,10 +98,8 @@ function Game () {
         if (pPoints > 21) {
             setWinner(true);
             setResult("Player Bust");
-        } else if (pPoints === 21) {
-            setWinner(true);
-            setResult("Player Wins!");
         }
+
         setPlayerPoints(pPoints);
     }
 
@@ -183,24 +142,15 @@ function Game () {
     }
 
     function resetGame() {
-        localStorage.removeItem("playerHand");
-        localStorage.removeItem("dealerHand");
-        localStorage.removeItem("firstTurn");
-
         restoreDeck();  // resets the deck so dealing can start fresh
 
-        const newHand = [deal(), deal()];
-        const newDealer = [deal(), deal()];
-
-        setHand(newHand);
-        setDealerHand(newDealer);
+        setHand([]);
+        setDealerHand([]);
         setWinner(false);
         setResult("");
         setPlayersTurn(true);
         setFirstTurn(true);
-
-        localStorage.setItem("playerHand", JSON.stringify(newHand));
-        localStorage.setItem("dealerHand", JSON.stringify(newDealer));
+        setGameInitialized(false);
     }
 
     
@@ -218,7 +168,7 @@ function Game () {
                     <div className={styles.dealerContainer}>
                         <h1 className={styles.counter}>{(firstTurn && dealerHand[0]) ? `${calcPoints([dealerHand[0]])} + ?` : dealerPoints}</h1>
                         <div className={styles.cards}>
-                            {(firstTurn) ? (
+                            {(firstTurn && !winner) ? (
                                 <>
                                     <img src={`/BlackJack/${dealerHand[0]}`} alt="dealers face card" />
                                     <img src="/BlackJack/back_of_card.png" alt="back of a playing card" />
