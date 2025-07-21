@@ -1,9 +1,13 @@
 .mainContainer {
-    min-height: 90vh;
+    height: 88vh;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: #f3f4f6;
+}
+
+.container {
+    margin: 0 auto;
 }
 
 .dealerContainer, .playerContainer {
@@ -18,9 +22,16 @@
     margin-right: auto;
     flex-direction: column;
     padding-top: 10px;
-    
+    max-width: 70vw;
+    flex-wrap: nowrap;
+    flex-shrink: 1;
 }
 
+.cards {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .playerContainer {
     margin-top: 75px;
 }
@@ -34,12 +45,7 @@
     margin: auto;
 }
 
-.split:disabled {
-    background-color: gray;
-    cursor: not-allowed;
-}
-
-.hit, .stand, .split{
+.hit, .stand {
     background-color: #4f46e5;
     color: white;
     padding: 0.5rem;
@@ -72,15 +78,24 @@
 img {
     margin-left: 10px;
     margin-right: 10px;
-    width: 150px;
+    max-width: 150px;
+    min-width: 50px;
+    width: 25vw;
 }
 
 .turn {
     margin-top: 10px;
     margin-bottom: 0px;
+    height: 5vh;
 }
 
 .counter {
     margin-top: 0px;
     margin-bottom: 10px;
+}
+
+@media (width < 400px) {
+    .dealerContainer, .playerContainer {
+        width: 70vw;
+    }
 }

@@ -67,11 +67,11 @@ function Game () {
 
     // updates the current point amounts for dealer and player upon change
     useEffect(() => {
-    const pPoints = calcPoints(hand);
-    const dPoints = calcPoints(dealerHand);
+        const pPoints = calcPoints(hand);
+        const dPoints = calcPoints(dealerHand);
 
-    setPlayerPoints(pPoints);
-    setDealerPoints(dPoints);
+        setPlayerPoints(pPoints);
+        setDealerPoints(dPoints);
 
     // Only run this blackjack check once at the start
         if (
@@ -89,7 +89,7 @@ function Game () {
                 setPlayersTurn(false);
             } else if (pPoints === 21) {
                 setWinner(true);
-                setResult("Player Wins!");
+                setResult("BlackJack!");
                 setPlayersTurn(false);
             }
 
@@ -97,19 +97,6 @@ function Game () {
             setFirstRender(false);
         }
     }, [hand, dealerHand]);
-
-
-    // checks if the player can split
-    function canSplit() {
-        if (hand.length === 2) {
-            const rank1 = hand[0].split("_of_")[0];
-            const rank2 = hand[1].split("_of_")[0];
-            if (rank1 === rank2) {
-                return <button className={styles.split}>Split</button>;
-            }
-        }
-        return <button className={styles.split} disabled>Split</button>;
-    }
 
     // calculates the points with a given hand
     function calcPoints(hand) {
@@ -254,7 +241,6 @@ function Game () {
                             <>
                                 <button className={styles.hit} onClick={hit} disabled={winner || !playersTurn}>Hit</button>
                                 <button className={styles.stand} onClick={stand} disabled={winner || !playersTurn}>Stand</button>
-                                {canSplit()}
                             </>
                         ):(
                             <button className={styles.newGame} onClick={resetGame}>New Game</button>
