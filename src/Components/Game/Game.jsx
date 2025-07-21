@@ -49,7 +49,7 @@ function Game () {
                 setPlayersTurn(false);
             } else if (dPoints === 21) {
                 setWinner(true);
-                setResult("Dealer Wins!");
+                setResult("Dealer BlackJack!");
                 setPlayersTurn(false);
             } else if (pPoints === 21) {
                 setWinner(true);
@@ -166,9 +166,9 @@ function Game () {
             <div className={styles.mainContainer}>
                 <div className={styles.container}>
                     <div className={styles.dealerContainer}>
-                        <h1 className={styles.counter}>{(firstTurn && dealerHand[0]) ? `${calcPoints([dealerHand[0]])} + ?` : dealerPoints}</h1>
+                        <h1 className={styles.counter}>{(firstTurn && !winner && dealerHand[0]) ? `${calcPoints([dealerHand[0]])} + ?` : dealerPoints}</h1>
                         <div className={styles.cards}>
-                            {(firstTurn && !winner) ? (
+                            {(playersTurn && firstTurn && !winner) ? (
                                 <>
                                     <img src={`/BlackJack/${dealerHand[0]}`} alt="dealers face card" />
                                     <img src="/BlackJack/back_of_card.png" alt="back of a playing card" />
